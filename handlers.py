@@ -43,18 +43,6 @@ async def myinfo_handler(message: types.Message):
     session.close()
 
 
-@router.message(F.text.regexp(r"^(?!\/).+"))
-async def log_message(message: types.Message):
-    session = SessionLocal()
-    user = session.query(User).filter(User.telegram_id == message.from_user.id).first()
-
-    if user:
-        log = MessageLog(user_id=user.id, message_text=message.text)
-        session.add(log)
-        session.commit()
-
-    session.close()
-
 @router.message(Command('history'))
 async def history_handler(message: types.Message):
     session = SessionLocal()
@@ -68,6 +56,22 @@ async def history_handler(message: types.Message):
                     all())
         if messages:
             text = "\n".join([f"{m.timestamp}: {m.message_text}" for m in messages])
-            await message.answer('Последние сообщения: ', text)
+            await message.answer(f'Последние сообщения:\n{text}')
+        else:
+            await message.answer('У вас пока нет сообщений в истории')
+    else:
+        await message.answer('Вы не зарегистрированы')
+
+    session.close()
+
+@router.message(F.text.regexp(r"^(?!\/).+"))
+async def log_message(message: types.Message):
+    session = SessionLocal()
+    user = session.query(User).filter(User.telegram_id == message.from_user.id).first()
+
+    if user:
+        log = MessageLog(user_id=user.id, message_text=message.text)
+        session.add(log)
+        session.commit()
 
     session.close()
