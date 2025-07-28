@@ -8,7 +8,7 @@ from database.db import engine
 
 load_dotenv()
 
-BOT = os.getenv("TOKEN")
+BOT = os.getenv("BOT_TOKEN")
 
 async def main():
     Base.metadata.create_all(engine)
